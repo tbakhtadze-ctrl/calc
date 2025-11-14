@@ -145,24 +145,20 @@
       </div>
 
       <div class="checkbox-group">
-        <div class="form-check">
-          <input type="checkbox" id="hasDecision" class="form-check-input">
-          <label class="form-check-label" for="hasDecision">ვადა გაიზარდა კომისიის გადაწყვეტილებით</label>
+    <label><input type="checkbox" id="hasDecision"> ვადა გაიზარდა კომისიის გადაწყვეტილებით</label>
+    <div id="decisionFields" style="display:none; margin-top:.7rem;">
+      <div class="date-group">
+        <div>
+          <label>გადაწყვეტილების თარიღი:</label>
+          <input type="date" id="decisionDate">
         </div>
-
-        <div id="decisionFields" style="display:none; margin-top:0.7rem;">
-          <div class="form-row">
-            <div class="form-group col-md-6">
-              <label>გადაწყვეტილების თარიღი:</label>
-              <input type="date" id="decisionDate" class="form-control">
-            </div>
-            <div class="form-group col-md-6">
-              <label>ბოლო ვადა გადაწყვეტილებით:</label>
-              <input type="date" id="decisionDeadline" class="form-control">
-            </div>
-          </div>
+        <div>
+          <label>ბოლო ვადა გადაწყვეტილებით:</label>
+          <input type="date" id="decisionDeadline">
         </div>
       </div>
+    </div>
+  </div>
 
       <div class="checkbox-group">
         <div class="form-check">
