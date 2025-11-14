@@ -1,0 +1,320 @@
+<!DOCTYPE html><html lang="ka"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>ბოლო ვადის კალკულატორი</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --bg-color: #0f172a;
+    --panel-color: #1e293b;
+    --accent: #facc15;
+    --text-color: #f8fafc;
+    --text-muted: #cbd5e1;
+    --border-color: #334155;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --datepicker-icon: invert(90%) sepia(5%) saturate(50%) brightness(180%);
+  }
+
+  body {
+    font-family: "Fira Sans", "Noto Sans Georgian", sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 1rem;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.6rem;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--panel-color);
+    padding: 1.5rem;
+    border-radius: 14px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  }
+
+  .form-group,
+  .checkbox-group {
+    margin-bottom: 1.2rem;
+  }
+
+  label {
+    font-weight: 500;
+    display: block;
+    margin-bottom: 0.45rem;
+    color: var(--text-muted);
+  }
+
+  input[type="date"],
+  input[type="number"] {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #0f172a;
+    color: var(--text-color);
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: var(--datepicker-icon);
+    cursor: pointer;
+  }
+
+  input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-right: 0.45rem;
+  }
+
+  .checkbox-group {
+    background: #0f172a;
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 10px;
+  }
+
+  .date-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .date-group > div {
+    flex: 1;
+    min-width: 220px;
+  }
+
+  .date-group input {
+    width: 100%;
+  }
+
+  #calculateBtn {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 1rem;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+  }
+
+  #calculateBtn:hover {
+    background: #fde047;
+  }
+
+  #addDelay {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 0.8rem;
+  }
+
+  #addDelay:hover {
+    background: var(--accent);
+    color: #000;
+  }
+
+  /* აქ დაემატა — ტექსტს იგივე ფერი, რაც +დამატება ღილაკს */
+  .delay-instruction {
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 0.6rem;
+  }
+
+  #result {
+    margin-top: 1.4rem;
+    background: #0f172a;
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--accent);
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 1rem;
+  }
+
+  strong {
+    color: var(--accent);
+  }
+
+  @media (max-width: 600px) {
+    .date-group {
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+  }
+</style>
+<script src="https://puc.poecdn.net/authenticated_preview_page/syncedState.3f7572448765332f3047.js"></script></head>
+<body>
+<h1><i class="fa-regular fa-calendar" style="color: #FFD43B;"></i>
+   ბოლო ვადის დასათვლელი კალკულატორი</h1>
+<div class="container">
+
+  <div class="form-group">
+    <label>მიმართვის თარიღი:</label>
+    <input type="date" id="startDate">
+  </div>
+
+  <div class="form-group">
+    <label>დღეების რაოდენობა:</label>
+    <input type="number" id="daysCount" min="1">
+  </div>
+
+  <div class="checkbox-group">
+    <label><input type="checkbox" id="hasDecision"> ვადა გაიზარდა კომისიის გადაწყვეტილებით</label>
+    <div id="decisionFields" style="display:none; margin-top:.7rem;">
+      <div class="date-group">
+        <div>
+          <label>გადაწყვეტილების თარიღი:</label>
+          <input type="date" id="decisionDate">
+        </div>
+        <div>
+          <label>ბოლო ვადა გადაწყვეტილებით:</label>
+          <input type="date" id="decisionDeadline">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="checkbox-group">
+    <label><input type="checkbox" id="hasDelays"> ადმინისტრაციულმა ორგანომ გადააცილა პასუხის ვადას</label>
+    <div id="delayFields" style="display:none; margin-top:.7rem;">
+      <p class="delay-instruction">შეიყვანე მაქსიმუმ 4 ვადაგადაცილება:</p>
+      <div id="delaysContainer">
+
+        <!-- პირველ ვადაგადაცილებაში წარწერები დამატებულია -->
+        <div class="date-group">
+          <div>
+            <label>პასუხის გაცემის ვადა:</label>
+            <input type="date" class="delayStart">
+          </div>
+          <div>
+            <label>პასუხის მიღების თარიღი:</label>
+            <input type="date" class="delayEnd">
+          </div>
+        </div>
+
+      </div>
+      <button type="button" id="addDelay">+ დამატება</button>
+    </div>
+  </div>
+
+  <button id="calculateBtn">გამოთვალე საბოლოო ვადა</button>
+  <div id="result"></div>
+</div>
+
+<script>
+const holidays = new Set(["2025-08-28","2025-10-14","2025-11-23"]);
+
+function isHoliday(date){
+  const d=date.getDay();
+  const iso=date.toISOString().split("T")[0];
+  return d===0 || d===6 || holidays.has(iso);
+}
+function addWorkdays(start,days){
+  let d=new Date(start),count=0;
+  while(count<days){
+    d.setDate(d.getDate()+1);
+    if(!isHoliday(d))count++;
+  }
+  return d;
+}
+function formatDate(date){
+  const dd=String(date.getDate()).padStart(2,'0');
+  const mm=String(date.getMonth()+1).padStart(2,'0');
+  return `${dd}/${mm}/${date.getFullYear()}`;
+}
+function uniqueDaysInRanges(ranges){
+  const s=new Set();
+  ranges.forEach(([f,t])=>{
+    for(let d=new Date(f);d<=t;d.setDate(d.getDate()+1)){
+      s.add(d.toISOString().split("T")[0]);
+    }
+  });
+  return s;
+}
+
+document.getElementById("hasDecision").addEventListener("change",e=>{
+  document.getElementById("decisionFields").style.display=e.target.checked?"block":"none";
+});
+document.getElementById("hasDelays").addEventListener("change",e=>{
+  document.getElementById("delayFields").style.display=e.target.checked?"block":"none";
+});
+
+document.getElementById("addDelay").addEventListener("click",()=>{
+  const container=document.getElementById("delaysContainer");
+  if(container.children.length>=4){alert("მაქსიმუმ 4 ვადაგადაცილება!");return;}
+  const div=document.createElement("div");
+  div.className="date-group";
+  div.innerHTML=`
+    <div>
+      <label>პასუხის გაცემის ვადა:</label>
+      <input type="date" class="delayStart" />
+    </div>
+    <div>
+      <label>პასუხის მიღების თარიღი:</label>
+      <input type="date" class="delayEnd" />
+    </div>`;
+  container.appendChild(div);
+});
+
+document.getElementById("calculateBtn").addEventListener("click",()=>{
+  const start=document.getElementById("startDate").value;
+  const days=parseInt(document.getElementById("daysCount").value,10);
+  if(!start||!days){alert("შეიყვანე მიმართვის თარიღი და დღეების რაოდენობა.");return;}
+  const startDate=new Date(start);
+  const hasDecision=document.getElementById("hasDecision").checked;
+  const hasDelays=document.getElementById("hasDelays").checked;
+  const delays=[];
+
+  if(hasDelays){
+    document.querySelectorAll(".delayStart").forEach((el,i)=>{
+      const f=el.value,t=document.querySelectorAll(".delayEnd")[i].value;
+      if(f&&t)delays.push([new Date(f),new Date(t)]);
+    });
+  }
+
+  let out="";
+  if(!hasDecision&&!hasDelays){
+    const last=addWorkdays(startDate,days);
+    out=`<strong>სცენარი 1:</strong> ბოლო ვადა — ${formatDate(last)}`;
+  }else if(hasDecision&&!hasDelays){
+    const dec=new Date(document.getElementById("decisionDeadline").value);
+    out=`<strong>სცენარი 2:</strong> ბოლო ვადა გადაწყვეტილებით — ${formatDate(dec)}`;
+  }else if(!hasDecision&&hasDelays){
+    const uniq=uniqueDaysInRanges(delays);
+    let total=0;
+    uniq.forEach(d=>{if(!isHoliday(new Date(d)))total++;});
+    const base=addWorkdays(startDate,days);
+    const fin=addWorkdays(base,total);
+    out=`<strong>სცენარი 3:</strong><br>ბოლო ვადა: ${formatDate(fin)}<br>გადაცილება: <span style="color:var(--success)">${total}</span> დღე`;
+  }else{
+    const decDate=new Date(document.getElementById("decisionDate").value);
+    const decDeadline=new Date(document.getElementById("decisionDeadline").value);
+    const after=delays.filter(([f,t])=>t>decDate)
+      .map(([f,t])=>[f>decDate?f:new Date(decDate.getTime()+86400000),t]);
+    const uniq=uniqueDaysInRanges(after);
+    let total=0;
+    uniq.forEach(d=>{if(!isHoliday(new Date(d)))total++;});
+    const fin=addWorkdays(decDeadline,total);
+    out=`<strong>სცენარი 4:</strong><br>ბოლო ვადა: ${formatDate(fin)}<br>გადაცილება: <span style="color:var(--danger)">${total}</span> დღე`;
+  }
+
+  document.getElementById("result").innerHTML=out;
+});
+</script>
+
+
+</body></html>
