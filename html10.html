@@ -100,7 +100,14 @@
       height: 0.8em;
       accent-color: var(--accent);
     }
-        
+     
+    .card {
+      background: var(--panel-color);
+      border: none;
+      border-radius: 14px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    }
+
     .form-check-label {
       margin: 0;
       padding-top: 2px;
@@ -229,8 +236,9 @@
 <body>
 <h1><i class="fa-regular fa-calendar" style="color: #FFD43B;"></i>
    ბოლო ვადის დასათვლელი კალკულატორი</h1>
-<div class="container">
+<div class="card p-4">
 
+  
   <div class="form-group">
     <label>მიმართვის თარიღი:</label>
     <input type="date" id="startDate">
