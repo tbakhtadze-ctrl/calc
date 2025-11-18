@@ -3,6 +3,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>ბოლო ვადის კალკულატორი</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- Bootstrap 4 CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  
 <style>
   :root {
     --bg-color: #0f172a;
@@ -39,11 +43,7 @@
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
   }
 
-  .form-group,
-  .checkbox-group {
-    margin-bottom: 1.2rem;
-  }
-
+  
   label {
     font-weight: 500;
     display: block;
@@ -74,11 +74,44 @@
   }
 
   .checkbox-group {
-    background: #0f172a;
-    border: 1px solid var(--border-color);
-    padding: 1rem;
-    border-radius: 10px;
-  }
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    /* ✅ სრულად გასწორებული checkbox-ები (ყველა ბრაუზერზე) */
+    .form-check {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      line-height: 1.3;
+      margin-bottom: 0.4rem;
+      gap: 0.5rem;
+    }
+
+    .form-check-input {
+      margin: 0 !important;
+      position: relative;
+      top: 0;
+      flex-shrink: 0;
+      width: 0.8em;
+      height: 0.8em;
+      accent-color: var(--accent);
+    }
+        
+    .form-check-label {
+      margin: 0;
+      padding-top: 2px;
+      color: var(--text-muted);
+      user-select: none;
+    }
+
+    #addDelay.btn:focus,
+    #addDelay.btn.focus {
+    box-shadow: none !important;
+    }
 
   .date-group {
     display: flex;
@@ -112,6 +145,42 @@
   #calculateBtn:hover {
     background: #fde047;
   }
+
+.delay-block {
+      border-top: 2px solid var(--accent);
+      margin-top: 30px;
+      padding-top: 10px;
+      position: relative;
+      animation: fadeIn 0.3s ease;  /* Smooth appearance */
+    }
+
+    /* Animation used for appearing delay fields */
+    @keyframes fadeIn {
+      from {opacity:0; transform: translateY(-4px);}
+      to {opacity:1; transform: translateY(0);}
+    }
+
+    /* "✕" REMOVE BUTTON FOR DELAY BLOCKS */
+    .removeDelay {
+      position: absolute;
+      top: 8px;
+      right: 0;
+      font-size: 1.2rem;
+      color: var(--accent);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+      transition: all 0.2s ease;
+    }
+
+    /* --- When hovering over the ✕ button --- */
+    .removeDelay:hover {
+      color: #fff;
+      transform: scale(1.2);
+    }
+
 
   #addDelay {
     background: transparent;
@@ -173,7 +242,7 @@
   </div>
 
   <div class="checkbox-group">
-    <label><input type="checkbox" id="hasDecision"> ვადა გაიზარდა კომისიის გადაწყვეტილებით</label>
+    <label><input type="checkbox" class="form-check-input" id="hasDecision"> ვადა გაიზარდა კომისიის გადაწყვეტილებით</label>
     <div id="decisionFields" style="display:none; margin-top:.7rem;">
       <div class="date-group">
         <div>
@@ -189,7 +258,7 @@
   </div>
 
   <div class="checkbox-group">
-    <label><input type="checkbox" id="hasDelays"> ადმინისტრაციულმა ორგანომ გადააცილა პასუხის ვადას</label>
+    <label><input type="checkbox" class="form-check-input" id="hasDelays"> ადმინისტრაციულმა ორგანომ გადააცილა პასუხის ვადას</label>
     <div id="delayFields" style="display:none; margin-top:.7rem;">
       <p class="delay-instruction">შეიყვანე მაქსიმუმ 4 ვადაგადაცილება:</p>
       <div id="delaysContainer">
@@ -207,13 +276,17 @@
         </div>
 
       </div>
-      <button type="button" id="addDelay">+ დამატება</button>
+      <button type="button" id="addDelay" class="btn btn-outline-warning btn-sm mt-3">+ დამატება</button>
     </div>
   </div>
 
   <button id="calculateBtn">გამოთვალე საბოლოო ვადა</button>
   <div id="result"></div>
 </div>
+
+<!-- Load jQuery and Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 <script>
 const holidays = new Set(["2025-08-28","2025-10-14","2025-11-23"]);
@@ -253,22 +326,45 @@ document.getElementById("hasDelays").addEventListener("change",e=>{
   document.getElementById("delayFields").style.display=e.target.checked?"block":"none";
 });
 
-document.getElementById("addDelay").addEventListener("click",()=>{
-  const container=document.getElementById("delaysContainer");
-  if(container.children.length>=4){alert("მაქსიმუმ 4 ვადაგადაცილება!");return;}
-  const div=document.createElement("div");
-  div.className="date-group";
-  div.innerHTML=`
-    <div>
-      <label>პასუხის გაცემის ვადა:</label>
-      <input type="date" class="delayStart" />
-    </div>
-    <div>
-      <label>პასუხის მიღების თარიღი:</label>
-      <input type="date" class="delayEnd" />
-    </div>`;
-  container.appendChild(div);
-});
+// Toggle display of decision fields when checkbox is checked/unchecked
+    $("#hasDecision").change(function(){ $("#decisionFields").toggle(this.checked); });
+    // Toggle display of delay fields
+    $("#hasDelays").change(function(){ $("#delayFields").toggle(this.checked); });
+
+// When user clicks "+ დამატება"
+    $("#addDelay").click(function(){
+      const container = $("#delaysContainer");
+      // Prevent more than 4 delay records
+      if (container.children(".delay-block").length + 1 >= 4) {
+        alert("მაქსიმუმ 4 ვადაგადაცილება დასაშვებია.");
+        return;
+      }
+
+      // Create new delay input block dynamically
+      const block = $(`
+        <div class="delay-block">
+          <button type="button" class="removeDelay">✕</button> <!-- remove button -->
+          <div class="form-row mt-2">
+            <div class="form-group col-md-6">
+              <label>პასუხის გაცემის ვადა:</label>
+              <input type="date" class="form-control delayStart" lang="ka-GE">
+            </div>
+            <div class="form-group col-md-6">
+              <label>პასუხის მიღების თარიღი:</label>
+              <input type="date" class="form-control delayEnd" lang="ka-GE">
+            </div>
+          </div>
+        </div>
+      `);
+
+      // Append created block to container
+      container.append(block);
+
+      // Add click handler to remove that block
+      block.find(".removeDelay").click(function() {
+        block.fadeOut(200, () => block.remove());
+      });
+    });
 
 document.getElementById("calculateBtn").addEventListener("click",()=>{
   const start=document.getElementById("startDate").value;
