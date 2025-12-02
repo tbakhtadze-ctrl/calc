@@ -1,0 +1,438 @@
+<!DOCTYPE html><html lang="ka"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>დავის ქრონოლოგია - შპს ანთაგის</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #111620;
+            --card-bg: #1c2333;
+            --input-bg: #242e42;
+            /* შეცვლილი ფერი */
+            --accent-color: #3675AF; 
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        /* PDF Button Styling */
+        .pdf-btn {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            display: inline-flex;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            /*background: #e74c3c;*/
+            color: #c0392b;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
+            border: 1px solid #c0392b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Noto Sans Georgian', sans-serif;
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Timeline Structure */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        /* The Vertical Line */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent-color), var(--card-bg));
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: var(--transition);
+        }
+
+        .timeline-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* The Dot */
+        .timeline-marker {
+            position: absolute;
+            left: -36px;
+            top: 20px;
+            width: 14px;
+            height: 14px;
+            background-color: var(--bg-dark);
+            border: 3px solid var(--accent-color);
+            border-radius: 50%;
+            z-index: 2;
+            transition: var(--transition);
+        }
+
+        .timeline-item:hover .timeline-marker {
+            background-color: var(--accent-color);
+            /* RGB for #3675AF is 54, 117, 175 */
+            box-shadow: 0 0 10px rgba(54, 117, 175, 0.5);
+        }
+
+        /* The Card */
+        .timeline-content {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            border: 1px solid transparent;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            /*border-left: 4px solid #3498db; /* Blue accent line */
+            transition: var(--transition);
+            cursor: default;
+        }
+
+       
+
+        .timeline-item:hover .timeline-content {
+            border-color: rgba(54, 117, 175, 0.3);
+            transform: translateX(5px);
+        }
+
+        .date-badge {
+            display: inline-block;
+            background-color: var(--input-bg);
+            color: var(--accent-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .timeline-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .timeline-desc {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .highlight {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        /* Status Indicators inside cards */
+        .status-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.05);           
+        }
+
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            border-right: 3px solid rgba(255,255,255,0.05);
+            padding-right: 15px;
+            text-align: center
+            
+    
+           
+        }
+
+        .status-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .status-value {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container { padding: 20px 15px; }
+            .timeline { padding-left: 20px; }
+            .timeline-marker { left: -27px; width: 12px; height: 12px; }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+<script src="https://puc.poecdn.net/authenticated_preview_page/syncedState.3f7572448765332f3047.js"></script></head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>დავის ქრონოლოგია</h1>
+        <p class="subtitle">შპს „ანთაგის“ ქსელთან მიერთების საქმე (№8054/01)</p>
+    </header>
+
+    <div class="timeline">
+
+        <!-- Event 1 -->
+        <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="date-badge">16 მაისი, 2025</div>
+                <h3 class="timeline-title">განაცხადის შეტანა</h3>
+                <p class="timeline-desc">
+                    შპს „ანთაგის“ დირექტორმა, გიორგი მიხანაშვილმა მიმართა კომპანიას გამანაწილებელ ქსელთან ორი ან მეტი ახალი ობიექტის მიერთების მოთხოვნით.
+                </p>
+                <div class="status-row">
+                    <div class="status-item">
+                        <span class="status-label">განაცხადის ნომერი</span>
+                        <span class="status-value">G107F252069</span>
+                        <a class="pdf-btn">PDF</a>
+                        </a>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">კომპენსაცია</span>
+                        <span class="status-value">41,400 ლარი</span>
+                        </a>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">ვადაგადაცილებების რაოდენობა</span>
+                        <span class="status-value">3</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Event 2 -->
+        <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="date-badge">14 ივლისი, 2025</div>
+                <h3 class="timeline-title">მიერთების ვადა და "დასრულება"</h3>
+                <p class="timeline-desc">
+                    მიერთებისთვის განსაზღვრული ბოლო ვადა. კომპანიამ ელექტრონულ ჟურნალში ატვირთა დასრულების აქტები (N0179, N109176-N109187), თითქოს სამუშაოები შესრულდა.
+                </p>
+                <a class="pdf-btn" href="file://192.168.10.35/მომსახურების კომერციული ხარისხი_Qlik/მომსახურების კომერციული ხარისხი/ქოლცენტრი/კითხვარი სოკარი.pdf">PDF</a>
+            </div>
+        </div>
+
+        <!-- Event 3 -->
+        <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="date-badge">8 აგვისტო, 2025</div>
+                <h3 class="timeline-title">საჩივარი კომისიაში</h3>
+                <p class="timeline-desc">
+                    კომისიაში შემოვიდა გიორგი მიხანაშვილის განცხადება (№8054/01) სამუშაოების დაუსრულებლობისა და კომპენსაციის მოთხოვნის თაობაზე.
+                </p>
+                <a class="pdf-btn">PDF</a>
+            </div>
+        </div>
+
+        <!-- Event 4 -->
+        <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="date-badge">11 აგვისტო, 2025</div>
+                <h3 class="timeline-title">კომისიის მოთხოვნა</h3>
+                <p class="timeline-desc">
+                    კომისიის აპარატმა (წერილი №3/11-6-6638) კომპანიისგან გამოითხოვა ახსნა-განმარტება და სრული დოკუმენტაცია.
+                </p>
+                <a class="pdf-btn">PDF</a>
+            </div>
+        </div>
+
+        <!-- Event 5 -->
+        <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="date-badge">25 აგვისტო, 2025</div>
+                <h3 class="timeline-title">კომპანიის პირველი პასუხი</h3>
+                <p class="timeline-desc">
+                    კომპანია ამტკიცებს, რომ მომარაგება განხორციელდა დროულად (14 ივლისს) და შედგენილია აქტები. აღნიშნავს, რომ მიმდინარეობს შიდა მოკვლევა.
+                </p>
+                <a class="pdf-btn">PDF</a>
+            </div>
+        </div>
+
+        <!-- Event 6 -->
+        <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="date-badge">29 სექტემბერი, 2025</div>
+                <h3 class="timeline-title">კომპანიის მეორე პასუხი</h3>
+                <p class="timeline-desc">
+                    კომპანია კვლავ ადასტურებს (წერილი N0929/348/25), რომ სამუშაოები შესრულდა კანონმდებლობის დაცვით და დროულად.
+                </p>
+                <a class="pdf-btn">PDF</a>
+            </div>
+        </div>
+
+        <!-- Event 7 -->
+        <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="date-badge">ვიდეო მტკიცებულება</div>
+                <h3 class="timeline-title">მომხმარებლის მტკიცებულება</h3>
+                <p class="timeline-desc">
+                    მომხმარებელმა კომისიას წარუდგინა ვიდეო მასალა, სადაც ჩანს, რომ მიერთების სამუშაოები რეალურად <span class="highlight">არ არის დასრულებული</span>.
+                </p>
+                <a class="pdf-btn">PDF</a>
+            </div>
+        </div>
+
+        <!-- Event 8 -->
+        <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="date-badge">7 ოქტომბერი, 2025</div>
+                <h3 class="timeline-title">აღიარება</h3>
+                <p class="timeline-desc">
+                    ვიდეოს წარდგენის შემდეგ, კომპანიამ აღიარა (წერილი N1007/519/25), რომ ახალი გარემოებების გამო მიერთება არ არის დასრულებული და მომხმარებელს ეკუთვნის კომპენსაცია.
+                </p>
+                <a class="pdf-btn">PDF</a>
+            </div>
+        </div>
+
+        <!-- Event 9 -->
+        <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="date-badge">17 ოქტომბერი, 2025</div>
+                <h3 class="timeline-title">კომისიის დამატებითი კითხვები</h3>
+                <p class="timeline-desc">
+                    კომისიამ მოითხოვა განმარტება: რის საფუძველზე აიტვირთა დასრულების აქტები ივლისში, თუ ოქტომბერში სამუშაოები ჯერ კიდევ მიმდინარეობდა?
+                </p>
+                <a class="pdf-btn">PDF</a>
+            </div>
+        </div>
+
+        <!-- Event 10 -->
+        <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <div class="date-badge">23 ოქტომბერი, 2025</div>
+                <h3 class="timeline-title">საბოლოო განმარტება</h3>
+                <p class="timeline-desc">
+                    კომპანიამ განმარტა, რომ მოსახლეობის ხელშეშლის გამო კაბელი ვერ გაიყვანეს და მოეწყო დროებითი სქემა. მოითხოვეს ჟურნალში ძველი ჩანაწერის გაუქმება და პირობა დადეს, რომ თვის ბოლომდე სამუშაოები დასრულდება.
+                </p>
+                <a class="pdf-btn">PDF</a>
+            </div>
+        </div>
+
+        <!-- Event 11 (New) -->
+        <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content" style="border-color: var(--accent-color);">
+                <!-- Added ID for JS targeting -->
+                <div id="current-date-badge" class="date-badge" style="background-color: rgba(54, 117, 175, 0.15);">...</div>
+                <h3 class="timeline-title">სამუშაოების დასრულება</h3>
+                <p class="timeline-desc">
+                    მიწისქვეშა კაბელის გაყვანის სამუშაოები წარმატებით დასრულდა. ობიექტი სრულად იღებს მოთხოვნილ სიმძლავრეს და მიერთების პროცესი საბოლოოდ დაიხურა.
+                </p>
+                <div class="status-row">
+                    <div class="status-item">
+                        <span class="status-label">სტატუსი</span>
+                        <span class="status-value" style="color: var(--accent-color);">დასრულებული</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">კომპენსაცია</span>
+                        <span class="status-value" style="color: #c0392b;">გადასახდელი</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 1. Set Current Date in Georgian
+        const dateBadge = document.getElementById('current-date-badge');
+        if (dateBadge) {
+            const now = new Date();
+            const months = [
+                "იანვარი", "თებერვალი", "მარტი", "აპრილი", "მაისი", "ივნისი",
+                "ივლისი", "აგვისტო", "სექტემბერი", "ოქტომბერი", "ნოემბერი", "დეკემბერი"
+            ];
+            const day = now.getDate();
+            const month = months[now.getMonth()];
+            const year = now.getFullYear();
+            
+            dateBadge.textContent = `${day} ${month}, ${year}`;
+        }
+
+        // 2. Intersection Observer for scroll animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target); // Only animate once
+                }
+            });
+        }, observerOptions);
+
+        const items = document.querySelectorAll('.timeline-item');
+        items.forEach(item => {
+            observer.observe(item);
+        });
+    });
+</script>
+
+
+
+</body></html>
