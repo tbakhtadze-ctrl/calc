@@ -1,0 +1,303 @@
+<!DOCTYPE html><html lang="ka"><head><meta name="x-poe-datastore-behavior" content="local_only"><meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://code.jquery.com https://unpkg.com https://d3js.org https://threejs.org https://cdn.plot.ly https://stackpath.bootstrapcdn.com https://maps.googleapis.com https://cdn.tailwindcss.com https://ajax.googleapis.com https://kit.fontawesome.com https://cdn.datatables.net https://maxcdn.bootstrapcdn.com https://code.highcharts.com https://tako-static-assets-production.s3.amazonaws.com https://www.youtube.com https://fonts.googleapis.com https://fonts.gstatic.com https://pfst.cf2.poecdn.net https://puc.poecdn.net https://i.imgur.com https://wikimedia.org https://*.icons8.com https://*.giphy.com https://picsum.photos https://images.unsplash.com; frame-src 'self' https://www.youtube.com https://trytako.com; child-src 'self'; manifest-src 'self'; worker-src 'self'; upgrade-insecure-requests; block-all-mixed-content;">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>მიკროსიმძლავრის ელექტროსადგურის მიერთების კალკულატორი</title>
+<style>
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #0f172a;
+  color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+h1 {
+  margin-top: 2em;
+  color: #f8fafc;
+  text-align: center;
+}
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  background: #1e293b;
+  border-radius: 16px;
+  margin-top: 2em;
+  padding: 2em;
+  width: 95%;
+  max-width: 1100px;
+  gap: 2em;
+}
+.form-panel, .result-panel {
+  flex: 1;
+  background: #0f172a;
+  padding: 1.5em;
+  border-radius: 12px;
+}
+label {
+  display: block;
+  margin-bottom: .2em;
+  color: #cbd5e1;
+}
+select, input[type="number"] {
+  width: 100% !important;     /* ← აიძულებს რომ იყოს ზუსტად იმდენივე */
+  max-width: 100% !important;
+  padding: .7em;
+  border-radius: 8px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  margin-bottom: 1em;
+  font-size: 0.95em;
+  font-family: "Segoe UI", sans-serif;
+}
+button {
+  width: 100%;
+  padding: .9em;
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .2s all ease;
+}
+button:hover {
+  background: linear-gradient(90deg, #1d4ed8, #2563eb);
+  transform: scale(1.03);
+}
+.result-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6em;
+  justify-content: center;
+}
+.result-value {
+  background: #1e293b;
+  border-radius: 14px;
+  padding: 1.2em 1.4em;
+  min-height: 90px;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+}
+.result-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6em;
+  margin-bottom: 0.4em;
+}
+.icon-box {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 6px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9em;
+  font-weight: 700;
+}
+.icon-green { background-color: #22c55e; }
+.icon-purple { background-color: #7A6CFF; }
+.result-value h3 {
+  font-size: 0.95em;
+  color: #f8fafc;
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+}
+.result-value p {
+  font-size: 0.95em;       /* იგივე რაც ველების სახელების */
+  font-weight: normal;     /* აღარ არის bold */
+  font-family: "Segoe UI", sans-serif;
+  color: #C0C0C0;          /* ახალი ფერი */
+  margin: 0;
+  line-height: 1.4em;
+}
+
+#smartlessCount {
+  width: calc(100% - 2px) !important;
+  box-sizing: border-box;
+}
+
+</style>
+<script src="https://puc.poecdn.net/authenticated_preview_page/syncedState.3f7572448765332f3047.js"></script></head>
+<body>
+
+<h1>მიკროსიმძლავრის ელექტროსადგურის მიერთების კალკულატორი</h1>
+
+<div class="container">
+
+  <div class="form-panel">
+
+    <label>მომხმარებლის ტიპი:</label>
+    <select id="userType">
+      <option value="retail">საცალო მომხმარებელი</option>
+      <option value="group">მომხმარებელთა ჯგუფი</option>
+    </select>
+
+    <label>ქსელის ტიპი:</label>
+    <select id="networkType">
+      <option value="internal">შიდა ქსელი</option>
+      <option value="distribution">გამანაწილებელი ქსელი</option>
+    </select>
+
+    <label>მდებარეობა სატრანსფორმატორო პუნქტის მიმართ:</label>
+    <select id="location">
+      <option value="same">ერთ მხარეს</option>
+      <option value="different">სხვადასხვა მხარეს</option>
+    </select>
+
+    <label>ჭკვიანი მრიცხველი:</label>
+    <select id="smartMeter">
+      <option value="yes">გააჩნია</option>
+      <option value="no">არ გააჩნია</option>
+    </select>
+
+    <label>ძაბვის საფეხური (კვ):</label>
+    <select id="voltage" onchange="updatePowerOptions()">
+      <option value="0.22">0.22 კვ</option>
+      <option value="0.38">0.38 კვ</option>
+      <option value="6-10">6–10 კვ</option>
+    </select>
+
+    <label>სიმძლავრე (კვტ):</label>
+    <select id="power"></select>
+
+    <label>მდებარეობა:</label>
+    <select id="region">
+      <option value="city">თვითმმართველი ქალაქი</option>
+      <option value="municipality">სხვა მუნიციპალიტეტი</option>
+    </select>
+
+    <label>ჭკვიანი მრიცხველის არმქონე აბონენტების რაოდენობა:</label>
+    <input type="number" id="smartlessCount" min="0" step="1" value="0">
+
+    <button onclick="calculate()">გამოთვლა</button>
+
+  </div>
+
+  <div class="result-panel">
+    <div class="result-value">
+      <div class="result-header">
+        <div class="icon-box icon-green">₾</div>
+        <h3>საფასური</h3>
+      </div>
+      <p id="price">—</p>
+    </div>
+    <div class="result-value">
+      <div class="result-header">
+        <div class="icon-box icon-purple"><span>⏱</span></div>
+        <h3>ვადა</h3>
+      </div>
+      <p id="deadline">—</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const powerOptions = {
+  "0.22": ["1-10"],
+  "0.38": ["1-10","10-30","30-50","50-80","80-100","100-120","120-150","150-200","200-320","320-500","500-800","800-1000","1000-1300","1300-1600","1600-2000","2000-2600","2600-3200"],
+  "6-10": ["1-500","500-1000","1000-1500","1500-2000","2000-3000","3000-5000"]
+};
+function updatePowerOptions(){
+  const v=document.getElementById("voltage").value;
+  const s=document.getElementById("power");
+  s.innerHTML="";
+  powerOptions[v].forEach(r=>{
+    const o=document.createElement("option");
+    o.value=r;
+    o.textContent=r+" კვტ";
+    s.appendChild(o);
+  });
+}
+updatePowerOptions();
+
+const annex2=[{v:"0.22",range:[1,10],city:40,mun:60,price:800},
+{v:"0.38",range:[1,10],city:40,mun:60,price:2000},
+{v:"0.38",range:[10,30],city:40,mun:60,price:7000},
+{v:"0.38",range:[30,50],city:40,mun:60,price:14000},
+{v:"0.38",range:[50,80],city:40,mun:60,price:22400},
+{v:"0.38",range:[80,100],city:40,mun:60,price:28000},
+{v:"0.38",range:[100,120],city:40,mun:60,price:36000},
+{v:"0.38",range:[120,150],city:40,mun:60,price:45000},
+{v:"0.38",range:[150,200],city:45,mun:60,price:80000},
+{v:"0.38",range:[200,320],city:60,mun:90,price:110000},
+{v:"0.38",range:[320,500],city:60,mun:90,price:167500},
+{v:"0.38",range:[500,800],city:90,mun:110,price:216000},
+{v:"0.38",range:[800,1000],city:90,mun:110,price:270000},
+{v:"0.38",range:[1000,1300],city:90,mun:110,price:288000},
+{v:"0.38",range:[1300,1600],city:90,mun:110,price:320000},
+{v:"0.38",range:[1600,2000],city:90,mun:110,price:400000},
+{v:"0.38",range:[2000,2600],city:90,mun:110,price:520000},
+{v:"0.38",range:[2600,3200],city:90,mun:110,price:640000},
+{v:"6-10",range:[1,500],city:60,mun:90,price:130000},
+{v:"6-10",range:[500,1000],city:90,mun:110,price:200000},
+{v:"6-10",range:[1000,1500],city:90,mun:110,price:287000},
+{v:"6-10",range:[1500,2000],city:90,mun:110,price:350000},
+{v:"6-10",range:[2000,3000],city:90,mun:120,price:463500},
+{v:"6-10",range:[3000,5000],city:90,mun:120,price:749000}];
+
+const annex4=[{v:"0.22",range:[1,10],days:15,price:400},
+{v:"0.38",range:[1,10],days:15,price:600},
+{v:"0.38",range:[10,30],days:15,price:600},
+{v:"0.38",range:[30,50],days:15,price:700},
+{v:"0.38",range:[50,80],days:15,price:700},
+{v:"0.38",range:[80,100],days:20,price:800},
+{v:"0.38",range:[100,120],days:20,price:800},
+{v:"0.38",range:[120,150],days:20,price:1000},
+{v:"0.38",range:[150,200],days:20,price:1200},
+{v:"0.38",range:[200,320],days:20,price:2200},
+{v:"0.38",range:[320,500],days:20,price:2500},
+{v:"0.38",range:[500,800],days:25,price:2800},
+{v:"0.38",range:[800,1000],days:25,price:3100},
+{v:"0.38",range:[1000,9999],days:25,price:3500},
+{v:"6-10",range:[1,500],days:25,price:13000},
+{v:"6-10",range:[500,1000],days:25,price:14000},
+{v:"6-10",range:[1000,9999],days:25,price:15000}];
+
+function parseRange(str){
+  const nums=str.replace(/[^\d-]/g,"").split("-").map(n=>parseInt(n));
+  return {min:nums[0],max:nums[1]||nums[0]};
+}
+function find(data,voltage,rangeStr){
+  const {min,max}=parseRange(rangeStr);
+  return data.find(d=>d.v===voltage && d.range[0]<=max && d.range[1]>=min);
+}
+
+function calculate(){
+  const net=document.getElementById("networkType").value;
+  const voltage=document.getElementById("voltage").value;
+  const range=document.getElementById("power").value;
+  const region=document.getElementById("region").value;
+  const smartless=parseInt(document.getElementById("smartlessCount").value)||0;
+  let priceText="—",daysText="—";
+  if(net==="distribution"){
+    const d=find(annex2,voltage,range);
+    if(d){
+      const cost=d.price;
+      const days=region==="city"?d.city:d.mun;
+      priceText=cost.toLocaleString("ka-GE")+" ₾";
+      daysText=days+" სამუშაო დღე";
+    }
+  } else {
+    const d=find(annex4,voltage,range);
+    if(d){
+      const cost=d.price*(smartless>0?smartless:1);
+      priceText=cost.toLocaleString("ka-GE")+" ₾";
+      daysText=d.days+" სამუშაო დღე";
+    }
+  }
+  document.getElementById("price").textContent=priceText;
+  document.getElementById("deadline").textContent=daysText;
+}
+</script>
+
+
+</body></html>
