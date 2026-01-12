@@ -111,7 +111,14 @@ button:hover {
   font-weight: 700;
 }
 .icon-green { background-color: #22c55e; }
-.icon-purple { background-color: #7A6CFF; }
+.icon-purple { background-color: #7A6CFF; color: white;}
+
+.icon {
+  padding-top: 3px;
+  width: 20px;
+  height: 20px;
+}
+
 .result-value h3 {
   font-size: 0.95em;
   color: #f8fafc;
@@ -220,7 +227,10 @@ button:hover {
     </div>
     <div class="result-value">
       <div class="result-header">
-        <div class="icon-box icon-purple"><span>⏱</span></div>
+        <div class="icon-box icon-purple"><span><svg class="icon" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+    <path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+  </svg></span></div>
         <h3>ვადა</h3>
       </div>
       <p id="deadline">—</p>
