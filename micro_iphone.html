@@ -148,8 +148,18 @@ button:hover {
 <div class="container">
 
   <div class="form-panel">
-      <div class="field" id="f-user">
-      <label>მიერთების მსურველი:</label>
+
+    <div class="field" id="f-comp">
+      <label>გამანაწილებელი კომპანია:</label>
+      <select id="comp">
+        <option value="0" disabled selected>აირჩიეთ</option>
+        <option value="epg">სს ენერგო-პრო ჯორჯია</option>
+        <option value="telasi">სს თელასი</option>
+      </select>
+    </div>
+
+    <div class="field" id="f-user">
+      <label>მიკროსიმძლავრის ელექტროსადგურის მფლობელი:</label>
       <select id="userType">
         <option value="0" disabled selected>აირჩიეთ</option>
         <option value="retail">ინდივიდუალური მომხმარებელი</option>
@@ -167,11 +177,11 @@ button:hover {
     </div>
 
     <div class="field hidden" id="f-location">
-      <label>მდებარეობა სატრანსფორმატორო პუნქტის მიმართ:</label>
+      <label>მიკროსიმძლავრის ელექტროსადგური და მომხმარებელი (მომხმარებელთა ჯგუფი) ორივე მიერთებულია საერთო სატრანსფორმატორო პუნქტის დაბალი ძაბვის მხარეს :</label>
       <select id="location">
         <option value="0" disabled selected>აირჩიეთ</option>
-        <option value="same">ერთ მხარეს</option>
-        <option value="different">სხვადასხვა მხარეს</option>
+        <option value="same">დიახ</option>
+        <option value="different">არა</option>
       </select>
     </div>
 
@@ -186,7 +196,26 @@ button:hover {
 
     <div class="field hidden" id="f-voltage">
       <label>მიკროსიმძლავრის მისაერთებელი ძაბვის საფეხური (კვ):</label>
-      <select id="voltage" onchange="updatePowerOptions()">
+      <select id="voltage" >
+        
+        <option value="0.22">0.22 კვ</option>
+        <option value="0.38">0.38 კვ</option>
+        <option value="6-10">6–10 კვ</option>
+      </select>
+    </div>
+
+    <div class="field hidden" id="f-voltage1">
+      <label>მიკროსიმძლავრის მისაერთებელი ძაბვის საფეხური (კვ):</label>
+      <select id="voltage1" >
+        
+        <option value="0.22">0.22 კვ</option>
+        <option value="0.38">0.38 კვ</option>
+      </select>
+    </div>
+
+    <div class="field hidden" id="f-voltage2">
+      <label>ობიექტის მისაერთებელი ძაბვის საფეხური (კვ):</label>
+      <select id="voltage2" >
         
         <option value="0.22">0.22 კვ</option>
         <option value="0.38">0.38 კვ</option>
@@ -197,6 +226,11 @@ button:hover {
     <div class="field hidden" id="f-power">
       <label>მიკროსიმძლავრის მისაერთებელი სიმძლავრე (კვტ):</label>
       <select id="power"></select>
+    </div>
+
+    <div class="field hidden" id="f-power2">
+      <label>ობიექტის მისაერთებელი სიმძლავრე (კვტ):</label>
+      <select id="power2"></select>
     </div>
 
     <div class="field hidden" id="f-region">
@@ -242,22 +276,65 @@ button:hover {
 <script>
 const powerOptions = {
   "0.22": ["1-10"],
+  "0.38": ["1-10","10-30","30-50","50-80","80-100","100-120","120-150","150-200","200-320","320-500"],
+  "6-10": ["1-500"]
+};
+
+const powerOptions1 = {
+  "0.22": ["1-10"],
+  "0.38": ["1-10","10-30","30-50","50-80","80-100"],
+};
+
+const powerOptions2 = {
+  "0.22": ["1-10"],
   "0.38": ["1-10","10-30","30-50","50-80","80-100","100-120","120-150","150-200","200-320","320-500","500-800","800-1000","1000-1300","1300-1600","1600-2000","2000-2600","2600-3200"],
   "6-10": ["1-500","500-1000","1000-1500","1500-2000","2000-3000","3000-5000"]
 };
 
-function updatePowerOptions(){
-  const v=document.getElementById("voltage").value;
-  const s=document.getElementById("power");
-  s.innerHTML="";
-  powerOptions[v].forEach(r=>{
-    const o=document.createElement("option");
-    o.value=r;
-    o.textContent=r+" კვტ";
-    s.appendChild(o);
+function updatePowerOptions(source){
+
+  let selectElement;
+  let options;
+
+  if(source === "voltage1"){
+    const v1 = document.getElementById("voltage1").value;
+    options = powerOptions1[v1];
+    selectElement = document.getElementById("power");
+
+  } else if(source === "voltage2"){
+    const v2 = document.getElementById("voltage2").value;
+    options = powerOptions2[v2];
+    selectElement = document.getElementById("power2");
+
+  } else if(source === "voltage"){
+    const v = document.getElementById("voltage").value;
+    options = powerOptions[v];
+    selectElement = document.getElementById("power");
+  }
+
+  if(!options || !selectElement) return;
+
+  selectElement.innerHTML = "";
+
+  options.forEach(r=>{
+    const o = document.createElement("option");
+    o.value = r;
+    o.textContent = r + " კვტ";
+    selectElement.appendChild(o);
   });
-  s.selectedIndex = 0;
+
+  selectElement.selectedIndex = 0;
 }
+
+document.getElementById("voltage")
+  .addEventListener("change", () => updatePowerOptions("voltage"));
+
+document.getElementById("voltage1")
+  .addEventListener("change", () => updatePowerOptions("voltage1"));
+
+document.getElementById("voltage2")
+  .addEventListener("change", () => updatePowerOptions("voltage2"));
+
 updatePowerOptions();
 
 const annex2=[
@@ -317,12 +394,15 @@ function find(data, voltage, rangeStr){
 }
 
 function calculate(){
+  const comp=document.getElementById("comp").value;
   const consumer=document.getElementById("userType").value;
   const networkType=document.getElementById("networkType");
   const net=document.getElementById("networkType").value;
   const location=document.getElementById("location").value;
   const smartmeter=document.getElementById("smartMeter").value;
   const voltage=document.getElementById("voltage").value;
+  const voltage1=document.getElementById("voltage1").value;  
+  const voltage2=document.getElementById("voltage2").value;  
   const range=document.getElementById("power").value;
   const region=document.getElementById("region").value;
   const smartless=parseInt(document.getElementById("smartlessCount").value)||0;
@@ -331,183 +411,305 @@ function calculate(){
 
 
 
-  if(consumer =="0" || net=="0") {
-    alert("გთხოვთ შეავსოთ მიერთების მსურველი და სად არის მოთხოვნილი მიერთება");
+  if(comp =="0" || consumer =="0" || net=="0") {
+    alert("გთხოვთ შეავსოთ გამანაწილებელი კომპანია, მიერთების მსურველი და სად არის მოთხოვნილი მიერთება");
     return;
   } 
 
-  if(consumer ==="retail"){
-    let cost;
-    let days;
-    if(net==="internal"){
-      if(smartmeter==="no"){
-        const d=find(annex4,voltage,range);
-        if(!d) return;
-        cost=d.price;
-        days=d.days;
-      } else {
-          if(smartmeter==="yes"){
-          cost=0;
-          days=10;
-          } else {// smartmeter not selected
-            alert("გთხოვთ მიუთითოთ გააჩნია თუ არა ჭკვიანი მრიცხველი");
-            return;
-          }
-      }
-    } else{
-      if(location==="same"){
-        const d=find(annex2,voltage,range);
-        const n=find(annex4,voltage,range);
-        if(!d||!n) return;
-    
-        cost=d.price+n.price;
-        
-      } else {
-        if(location==="different"){
-          if(smartmeter==="no"){
-            const d=find(annex2,voltage,range);
-            const n=find(annex4,voltage,range);
-            if(!d||!n) return;
-      
-            cost=d.price+2*n.price;
-          
-          } else {
-            if(smartmeter==="yes"){
-            const d=find(annex2,voltage,range);
-            const n=find(annex4,voltage,range);
-            if(!d||!n) return;
-      
-            cost=d.price+n.price;  
-            } else {// smartmeter not selected
-            alert("გთხოვთ მიუთითოთ გააჩნია თუ არა ჭკვიანი მრიცხველი");
-            return;
-            }
-          } 
-        } else {// location not selected
-            alert("გთხოვთ მიუთითოთ მდებარეობა სატრანსფორმატორო პუნქტის მიმართ");
-            return;
-        }
-      }
-      const d=find(annex2,voltage,range);
-      if(!d) return;
-      if(region === "city") {
-          days = d.city;
-      } else {
-          if(region === "municipality") {
-          days = d.mun;
-          } else {
-            // region not selected
-          alert("გთხოვთ მიუთითოთ მდებარეობა");
-          return;
-          }
-      }
-    }
-    priceText=cost.toLocaleString("ka-GE")+" ₾";
-    daysText=days+" სამუშაო დღე";
-  }
-  
-  if(consumer ==="group"){
-    let cost;
-    let days;
-    if(net==="internal"){
-      if(location==="same"){
+
+  if(comp ==="telasi"){
+    if(consumer ==="retail"){
+      let cost;
+      let days;
+      if(net==="internal"){
         if(smartmeter==="no"){
           const d=find(annex4,voltage,range);
           if(!d) return;
           cost=d.price;
           days=d.days;
         } else {
-          if(smartmeter==="yes"){
-          cost=0;
-          days=10; 
-          } else {// smartmeter not selected
-          alert("გთხოვთ მიუთითოთ გააჩნია თუ არა ჭკვიანი მრიცხველი");
-          return;
-          }
-        }        
-      } else {
-        if(location==="different"){
-          if(smartmeter==="no"){
-            const d=find(annex4,voltage,range);
-            if(!d) return;
-            cost=d.price*smartless;
-            days=d.days;
-          
-          } else {
             if(smartmeter==="yes"){
             cost=0;
             days=10;
             } else {// smartmeter not selected
-            alert("გთხოვთ მიუთითოთ გააჩნია თუ არა ჭკვიანი მრიცხველი");
+              alert("გთხოვთ მიუთითოთ გააჩნია თუ არა ჭკვიანი მრიცხველი");
+              return;
+            }
+        }
+      } else{
+        if(location==="same"){
+          const d=find(annex2,voltage,range);
+          const n=find(annex4,voltage,range);
+          if(!d||!n) return;
+      
+          cost=d.price+n.price;
+          
+        } else {
+          if(location==="different"){
+            if(smartmeter==="no"){
+              const d=find(annex2,voltage,range);
+              const n=find(annex4,voltage,range);
+              if(!d||!n) return;
+        
+              cost=d.price+2*n.price;
+            
+            } else {
+              if(smartmeter==="yes"){
+              const d=find(annex2,voltage,range);
+              const n=find(annex4,voltage,range);
+              if(!d||!n) return;
+        
+              cost=d.price+n.price;  
+              } else {// smartmeter not selected
+              alert("გთხოვთ მიუთითოთ გააჩნია თუ არა ჭკვიანი მრიცხველი");
+              return;
+              }
+            } 
+          } else {// location not selected
+              alert("გთხოვთ მიუთითოთ მდებარეობა სატრანსფორმატორო პუნქტის მიმართ");
+              return;
+          }
+        }
+        const d=find(annex2,voltage,range);
+        if(!d) return;
+        if(region === "city") {
+            days = d.city;
+        } else {
+            if(region === "municipality") {
+            days = d.mun;
+            } else {
+              // region not selected
+            alert("გთხოვთ მიუთითოთ მდებარეობა");
             return;
             }
-          } 
-        } else {// location not selected
-            alert("გთხოვთ მიუთითოთ მდებარეობა სატრანსფორმატორო პუნქტის მიმართ");
-            return;
         }
       }
-    } else{
-      if(location==="same"){
-        const d=find(annex2,voltage,range);
-        const n=find(annex4,voltage,range);
-        if(!d||!n) return;
+      priceText=cost.toLocaleString("ka-GE")+" ₾";
+      daysText=days+" სამუშაო დღე";
+    }
     
-        cost=d.price+n.price;
-        
-      } else {
-        if(location==="different"){
+    if(consumer ==="group"){
+      let cost;
+      let days;
+      if(net==="internal"){
+        if(location==="same"){
           if(smartmeter==="no"){
-            const d=find(annex2,voltage,range);
-            const n=find(annex4,voltage,range);
-            if(!d||!n) return;
-      
-            cost=d.price+(smartless+1)*n.price;
-          
+            const d=find(annex4,voltage,range);
+            if(!d) return;
+            cost=d.price;
+            days=d.days;
           } else {
             if(smartmeter==="yes"){
-            const d=find(annex2,voltage,range);
-            const n=find(annex4,voltage,range);
-            if(!d||!n) return;
-      
-            cost=d.price+n.price;  
+            cost=0;
+            days=10; 
             } else {// smartmeter not selected
             alert("გთხოვთ მიუთითოთ გააჩნია თუ არა ჭკვიანი მრიცხველი");
             return;
             }
-          } 
-        } else {// location not selected
-            alert("გთხოვთ მიუთითოთ მდებარეობა სატრანსფორმატორო პუნქტის მიმართ");
+          }        
+        } else {
+          if(location==="different"){
+            if(smartmeter==="no"){
+              const d=find(annex4,voltage,range);
+              if(!d) return;
+              cost=d.price*smartless;
+              days=d.days;
+            
+            } else {
+              if(smartmeter==="yes"){
+              cost=0;
+              days=10;
+              } else {// smartmeter not selected
+              alert("გთხოვთ მიუთითოთ გააჩნია თუ არა ჭკვიანი მრიცხველი");
+              return;
+              }
+            } 
+          } else {// location not selected
+              alert("გთხოვთ მიუთითოთ მდებარეობა სატრანსფორმატორო პუნქტის მიმართ");
+              return;
+          }
+        }
+      } else{
+        if(location==="same"){
+          const d=find(annex2,voltage,range);
+          const n=find(annex4,voltage,range);
+          if(!d||!n) return;
+      
+          cost=d.price+n.price;
+          
+        } else {
+          if(location==="different"){
+            if(smartmeter==="no"){
+              const d=find(annex2,voltage,range);
+              const n=find(annex4,voltage,range);
+              if(!d||!n) return;
+        
+              cost=d.price+(smartless+1)*n.price;
+            
+            } else {
+              if(smartmeter==="yes"){
+              const d=find(annex2,voltage,range);
+              const n=find(annex4,voltage,range);
+              if(!d||!n) return;
+        
+              cost=d.price+n.price;  
+              } else {// smartmeter not selected
+              alert("გთხოვთ მიუთითოთ გააჩნია თუ არა ჭკვიანი მრიცხველი");
+              return;
+              }
+            } 
+          } else {// location not selected
+              alert("გთხოვთ მიუთითოთ მდებარეობა სატრანსფორმატორო პუნქტის მიმართ");
+              return;
+          }
+        }
+        const d=find(annex2,voltage,range);
+        if(!d) return;
+        if(region === "city") {
+            days = d.city;
+        } else {
+            if(region === "municipality") {
+            days = d.mun;
+            } else {
+              // region not selected
+            alert("გთხოვთ მიუთითოთ მდებარეობა");
             return;
+            }
         }
       }
-      const d=find(annex2,voltage,range);
-      if(!d) return;
-      if(region === "city") {
-          days = d.city;
-      } else {
-          if(region === "municipality") {
-          days = d.mun;
-          } else {
-            // region not selected
-          alert("გთხოვთ მიუთითოთ მდებარეობა");
-          return;
-          }
-      }
+      priceText=cost.toLocaleString("ka-GE")+" ₾";
+      daysText=[days+" სამუშაო დღე"];
     }
-    priceText=cost.toLocaleString("ka-GE")+" ₾";
-    daysText=[days+" სამუშაო დღე"];
-  }
+    document.getElementById("price").textContent=priceText;
+    document.getElementById("deadline").textContent=daysText;
   
-  document.getElementById("price").textContent=priceText;
-  document.getElementById("deadline").textContent=daysText;
-}
+  
+  
+  //ენერგო-პრო ჯორჯიას შემთხვევაში
+  
+  } else {
+    if(consumer ==="retail"){
+      let cost;
+      let days;
+      if(net==="internal"){
+        if(smartmeter==="no"){
+          const d=find(annex4,voltage1,range);
+          if(!d) return;
+          cost=d.price;
+          days=d.days;
+        } else {
+            if(smartmeter==="yes"){
+            cost=0;
+            days=10;
+            } else {// smartmeter not selected
+              alert("გთხოვთ მიუთითოთ გააჩნია თუ არა ჭკვიანი მრიცხველი");
+              return;
+            }
+        }
+      } else{
+        if(location==="same"){
+          const d=find(annex2,voltage1,range);
+          const n=find(annex4,voltage1,range);
+          if(!d||!n) return;
+      
+          cost=d.price+n.price;
+        } else {
+          if(location==="different"){
+            alert("ამ შემთხვევაში, განაცხადი დახარვეზდება, რადგან ქსელთან მიერთებული მიკროსიმძლავრის ელექტროსადგურების ჯამური დადგმული სიმძლავრის 20%-იანი ზღვარი ათვისებულია")
+            
+          } else {// location not selected
+              alert("გთხოვთ მიუთითოთ მდებარეობა სატრანსფორმატორო პუნქტის მიმართ");
+              return;
+          }
+        }
+        const d=find(annex2,voltage1,range);
+        if(!d) return;
+        if(region === "city") {
+            days = d.city;
+        } else {
+            if(region === "municipality") {
+            days = d.mun;
+            } else {
+              // region not selected
+            alert("გთხოვთ მიუთითოთ მდებარეობა");
+            return;
+            }
+        }
+      }
+      priceText=cost.toLocaleString("ka-GE")+" ₾";
+      daysText=days+" სამუშაო დღე";
+    }
+    
+    if(consumer ==="group"){
+      let cost;
+      let days;
+      if(net==="internal"){
+        if(location==="same"){
+          if(smartmeter==="no"){
+            const d=find(annex4,voltage1,range);
+            if(!d) return;
+            cost=d.price;
+            days=d.days;
+          } else {
+            if(smartmeter==="yes"){
+            cost=0;
+            days=10; 
+            } else {// smartmeter not selected
+            alert("გთხოვთ მიუთითოთ გააჩნია თუ არა ჭკვიანი მრიცხველი");
+            return;
+            }
+          }        
+        } else {
+          if(location==="different"){
+            alert("ამ შემთხვევაში, მომხმარებელთა ჯგუფი ვერ ისარგებლებს ნეტო დარიცხვის ანგარიშსწორების მექანიზმით და განაცხადი დახარვეზდება, რადგან ქსელთან მიერთებული მიკროსიმძლავრის ელექტროსადგურების ჯამური დადგმული სიმძლავრის 20%-იანი ზღვარი ათვისებულია")
+          } else {// location not selected
+              alert("გთხოვთ მიუთითოთ მდებარეობა სატრანსფორმატორო პუნქტის მიმართ");
+              return;
+          }
+        }
+      } else{
+        if(location==="same"){
+          const d=find(annex2,voltage1,range);
+          const n=find(annex4,voltage1,range);
+          if(!d||!n) return;
+      
+          cost=d.price+n.price;
+          
+        } else {
+          if(location==="different"){
+            alert("ამ შემთხვევაში, მომხმარებელთა ჯგუფი ვერ ისარგებლებს ნეტო დარიცხვის ანგარიშსწორების მექანიზმით და განაცხადი დახარვეზდება, რადგან ქსელთან მიერთებული მიკროსიმძლავრის ელექტროსადგურების ჯამური დადგმული სიმძლავრის 20%-იანი ზღვარი ათვისებულია")
+          } else {// location not selected
+              alert("გთხოვთ მიუთითოთ მდებარეობა სატრანსფორმატორო პუნქტის მიმართ");
+              return;
+          }
+        }
+        const d=find(annex2,voltage1,range);
+        if(!d) return;
+        if(region === "city") {
+            days = d.city;
+        } else {
+            if(region === "municipality") {
+            days = d.mun;
+            } else {
+              // region not selected
+            alert("გთხოვთ მიუთითოთ მდებარეობა");
+            return;
+            }
+        }
+      }
+      priceText=cost.toLocaleString("ka-GE")+" ₾";
+      daysText=[days+" სამუშაო დღე"];
+    }
+    document.getElementById("price").textContent=priceText;
+    document.getElementById("deadline").textContent=daysText;
+  }
+} 
 
 
 
 function hideAll() {
   document.querySelectorAll(".field").forEach(f => {
-    if (f.id !== "f-user" && f.id !== "f-network") {
+    if (f.id !== "f-user" && f.id !== "f-network" && f.id !== "f-comp") {
       f.classList.add("hidden");
     }
   });
@@ -520,6 +722,29 @@ function show(id) {
 function hide(id) {
   document.getElementById(id).classList.add("hidden");
 }
+
+// When company changes
+document.getElementById("comp").onchange = () => {
+  document.getElementById("price").textContent="_";
+  document.getElementById("deadline").textContent="_";
+  let comp=document.getElementById("comp");
+
+  
+  // Reset networkType and all other dependent fields
+  networkType.value = "0"; // reset network select
+  userType.value = "0"; // reset user select
+
+  hideAll();
+
+  const fieldsToReset = ["location", "smartMeter", "voltage", "power", "region", "smartlessCount"];
+  fieldsToReset.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if (el.tagName === "SELECT") el.value = "0";
+    else if (el.tagName === "INPUT" && el.type === "number") el.value = 0;
+  });
+};
 
 
 // When userType changes
@@ -583,9 +808,11 @@ locationSelect.onchange = () => {
   document.getElementById("deadline").textContent="_";
   const net = networkType.value;
   const loc = document.getElementById("location").value;
+  const comp = document.getElementById("comp").value;
+  const user = document.getElementById("userType").value;
 
   // Reset dependent fields only
-  const fieldsToReset = ["voltage", "power", "smartMeter", "region"];
+  const fieldsToReset = ["voltage", "voltage1", "voltage2", "power", "smartMeter", "region"];
   fieldsToReset.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -594,15 +821,48 @@ locationSelect.onchange = () => {
     else if (el.tagName === "INPUT" && el.type === "number") el.value = 0;
   });
   
+  if (comp === "epg"  && user === "group" && net === "internal" && loc === "different") {
+    hide("f-smart");
+    hide("f-voltage1");
+    hide("f-voltage2");
+    hide("f-voltage");
+    hide("f-region");
+    hide("f-power");
+    updatePowerOptions();
+    return; 
+  }
 
-  if (net === "distribution" && loc === "same") {
-    show("f-voltage");
+  if (comp === "epg" && net === "distribution" && loc === "different") {
+    hide("f-smart");
+    hide("f-voltage1");
+    hide("f-voltage2");
+    hide("f-voltage");
+    hide("f-region");
+    hide("f-power");
+    updatePowerOptions();
+    return; 
+  }
+
+  if (comp === "epg" && net === "distribution" && loc === "same") {
+    show("f-voltage1");
     show("f-power");
     show("f-region")
     hide("f-smart")
+    updatePowerOptions();
+    return; 
+  }
+
+  if (comp === "telasi" && net === "distribution" && loc === "same") {
+    show("f-voltage");
+    alert("giig")
+    show("f-power");
+    show("f-region")
+    hide("f-smart")
+    hide("f-voltage2");
     return; 
   }
   show("f-smart");
+  updatePowerOptions();
   
 };
 
@@ -615,9 +875,10 @@ document.getElementById("smartMeter").onchange = () => {
   const net = networkType.value;
   const smart = smartmeterId.value;
   const loc = document.getElementById("location").value;
+  const comp = document.getElementById("comp").value;
 
   // Reset dependent fields only
-  const fieldsToReset = ["voltage", "power", "region"];
+  const fieldsToReset = ["voltage", "voltage1", "voltage2", "power", "region"];
   fieldsToReset.forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -631,11 +892,23 @@ document.getElementById("smartMeter").onchange = () => {
   if (net === "internal" && smart === "yes") {
     document.getElementById("price").textContent = "0 ₾";
     document.getElementById("deadline").textContent = "10 სამუშაო დღე";
+    hide("f-voltage1")
+    hide("f-voltage2")
     hide("f-voltage")
     hide("f-power")
     return;
   }
+
+  if (comp === "telasi" && user === "retail" && net === "distribution" && loc === "different" && smart === "no") {
+    show("f-voltage");
+    show("f-voltage2");
+    show("f-power");
+    show("f-power2");
+    updatePowerOptions()
+  }
+
   if (user === "group" && loc === "different" && smart === "no") {
+    alert('მიკროს მიერთების დასრულების შემდეგ აითვლება ჭკვიანი მრიცხველის მოწყობის ვადა')
     show("f-smartless")
     show("f-voltage");
     show("f-power");
@@ -651,8 +924,15 @@ document.getElementById("smartMeter").onchange = () => {
     show("f-power");
   }
   // სხვა ყველა შემთხვევაში საჭიროა გამოთვლა
+  if (comp === "epg") {
+    updatePowerOptions();
+    show("f-voltage1");
+    show("f-power");
+    return;
+  }
   show("f-voltage");
   show("f-power");
+  updatePowerOptions();
 };
 
 document.getElementById("region").onchange = () => {
